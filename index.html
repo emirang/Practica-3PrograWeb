@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TaskFlow: gestor de tareas con guardado local, búsqueda, filtros, ordenamiento y estadísticas.">
+    <meta name="theme-color" content="#5b5ef4">
+    <title>TaskFlow · Gestor de Tareas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- ============ ENCABEZADO ============ -->
+        <header class="cabecera">
+            <div class="marca">
+                <div class="marca-icono" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                        <rect x="9" y="3" width="6" height="4" rx="1"/>
+                        <path d="m9 14 2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>TaskFlow</h1>
+                    <p class="subtitulo">Organiza tus tareas, cumple tus metas.</p>
+                </div>
+            </div>
+
+            <button type="button" class="boton boton-primario" id="btnNuevaTarea">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span>Nueva tarea</span>
+            </button>
+        </header>
+
+        <main>
+            <!-- ============ ESTADÍSTICAS ============ -->
+            <section class="resumen" aria-label="Resumen de tareas">
+                <article class="stat-card stat-total">
+                    <div class="stat-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 6h13M8 12h13M8 18h13"/>
+                            <path d="M3 6h.01M3 12h.01M3 18h.01"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <strong class="stat-valor" id="statTotal">0</strong>
+                        <span class="stat-etiqueta">Total de tareas</span>
+                    </div>
+                </article>
+
+                <article class="stat-card stat-pendientes">
+                    <div class="stat-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 7v5l3 2"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <strong class="stat-valor" id="statPendientes">0</strong>
+                        <span class="stat-etiqueta">Pendientes</span>
+                    </div>
+                </article>
+
+                <article class="stat-card stat-completadas">
+                    <div class="stat-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <path d="m9 11 3 3L22 4"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <strong class="stat-valor" id="statCompletadas">0</strong>
+                        <span class="stat-etiqueta">Completadas</span>
+                    </div>
+                </article>
+
+                <article class="stat-card stat-vencidas">
+                    <div class="stat-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+                            <path d="M12 9v4M12 17h.01"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <strong class="stat-valor" id="statVencidas">0</strong>
+                        <span class="stat-etiqueta">Vencidas</span>
+                    </div>
+                </article>
+            </section>
+
+            <!-- ============ PROGRESO ============ -->
+            <section class="panel panel-progreso" aria-label="Progreso general">
+                <div class="progreso-cabecera">
+                    <div>
+                        <h2>Progreso general</h2>
+                        <p class="progreso-mensaje" id="progressMessage">Agrega tu primera tarea para comenzar.</p>
+                    </div>
+                    <strong class="progreso-porcentaje" id="progressText">0%</strong>
+                </div>
+                <div class="barra-progreso" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Porcentaje de tareas completadas">
+                    <div class="barra-relleno" id="progressBar"></div>
+                </div>
+            </section>
+
+            <!-- ============ BUSCADOR Y FILTROS ============ -->
+            <section class="panel controles" aria-label="Buscar y filtrar tareas">
+                <div class="buscador">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input type="search" id="buscador" placeholder="Buscar tareas..." autocomplete="off" aria-label="Buscar por título, descripción o categoría">
+                    <button type="button" class="btn-limpiar-busqueda" id="btnLimpiarBusqueda" aria-label="Limpiar búsqueda" hidden>&times;</button>
+                </div>
+
+                <div class="filtros">
+                    <div class="segmentado" id="filtrosEstado" role="group" aria-label="Filtrar por estado">
+                        <button type="button" class="segmentado-btn activo" data-estado="todas" aria-pressed="true">Todas</button>
+                        <button type="button" class="segmentado-btn" data-estado="pendientes" aria-pressed="false">Pendientes</button>
+                        <button type="button" class="segmentado-btn" data-estado="completadas" aria-pressed="false">Completadas</button>
+                    </div>
+
+                    <select id="filtroCategoria" class="select-filtro" aria-label="Filtrar por categoría">
+                        <option value="todas">Todas las categorías</option>
+                        <option value="Estudio">Estudio</option>
+                        <option value="Trabajo">Trabajo</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Hogar">Hogar</option>
+                        <option value="Salud">Salud</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+
+                    <select id="filtroPrioridad" class="select-filtro" aria-label="Filtrar por prioridad">
+                        <option value="todas">Todas las prioridades</option>
+                        <option value="alta">Prioridad alta</option>
+                        <option value="media">Prioridad media</option>
+                        <option value="baja">Prioridad baja</option>
+                    </select>
+
+                    <select id="orden" class="select-filtro" aria-label="Ordenar tareas">
+                        <option value="recientes">Más recientes</option>
+                        <option value="antiguas">Más antiguas</option>
+                        <option value="fecha">Fecha límite</option>
+                        <option value="prioridad">Prioridad</option>
+                        <option value="titulo">Título (A-Z)</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- ============ LISTA DE TAREAS ============ -->
+            <section class="seccion-tareas" aria-labelledby="tituloMisTareas">
+                <div class="seccion-cabecera">
+                    <h2 id="tituloMisTareas">Mis tareas <span class="contador" id="contadorVisibles">0</span></h2>
+                    <div class="acciones-seccion">
+                        <button type="button" class="boton boton-fantasma boton-pequeno" id="btnLimpiarFiltros" hidden>Limpiar filtros</button>
+                        <button type="button" class="boton boton-fantasma boton-pequeno" id="btnLimpiarCompletadas" disabled>Limpiar completadas</button>
+                    </div>
+                </div>
+
+                <div id="listaTareas" class="lista-tareas"></div>
+                <div id="estadoVacio" class="estado-vacio" hidden></div>
+            </section>
+
+        </main>
+
+        <footer class="pie">
+            <p>Los datos se guardan automáticamente en tu navegador mediante <strong>localStorage</strong>.</p>
+        </footer>
+    </div>
+
+    <!-- ============ MODAL: NUEVA / EDITAR TAREA ============ -->
+    <div class="modal" id="modalTarea" hidden>
+        <div class="modal-fondo" data-close></div>
+        <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="tituloModalTarea">
+            <div class="modal-cabecera">
+                <h2 id="tituloModalTarea">Nueva tarea</h2>
+                <button type="button" class="boton-cerrar" data-close aria-label="Cerrar formulario">&times;</button>
+            </div>
+
+            <form id="formTarea" novalidate>
+                <input type="hidden" id="tareaId">
+
+                <div class="campo">
+                    <label for="titulo">Título <span class="obligatorio">*</span></label>
+                    <input type="text" id="titulo" name="titulo" maxlength="80" placeholder="Ej. Entregar la práctica de programación web" autocomplete="off" aria-describedby="errorTitulo">
+                    <p class="mensaje-error" id="errorTitulo" role="alert"></p>
+                </div>
+
+                <div class="campo">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" maxlength="300" rows="3" placeholder="Detalles opcionales de la tarea..."></textarea>
+                </div>
+
+                <div class="campo-fila">
+                    <div class="campo">
+                        <label for="categoria">Categoría <span class="obligatorio">*</span></label>
+                        <select id="categoria" name="categoria">
+                            <option value="Estudio">Estudio</option>
+                            <option value="Trabajo">Trabajo</option>
+                            <option value="Personal" selected>Personal</option>
+                            <option value="Hogar">Hogar</option>
+                            <option value="Salud">Salud</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                        <p class="mensaje-error" id="errorCategoria" role="alert"></p>
+                    </div>
+
+                    <div class="campo">
+                        <label for="prioridad">Prioridad <span class="obligatorio">*</span></label>
+                        <select id="prioridad" name="prioridad">
+                            <option value="alta">Alta</option>
+                            <option value="media" selected>Media</option>
+                            <option value="baja">Baja</option>
+                        </select>
+                        <p class="mensaje-error" id="errorPrioridad" role="alert"></p>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label for="fechaLimite">Fecha límite</label>
+                    <input type="date" id="fechaLimite" name="fechaLimite">
+                    <span class="ayuda">Si la fecha ya pasó, la tarea se marcará como vencida.</span>
+                    <p class="mensaje-error" id="errorFechaLimite" role="alert"></p>
+                </div>
+
+                <div class="modal-acciones">
+                    <button type="button" class="boton boton-fantasma" data-close>Cancelar</button>
+                    <button type="submit" class="boton boton-primario" id="btnGuardar">Agregar tarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: CONFIRMACIÓN ============ -->
+    <div class="modal" id="modalConfirmar" hidden>
+        <div class="modal-fondo" data-close></div>
+        <div class="modal-caja modal-caja-confirmar" role="alertdialog" aria-modal="true" aria-labelledby="tituloConfirmar" aria-describedby="mensajeConfirmar">
+            <div class="confirmar-icono" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+                    <path d="M12 9v4M12 17h.01"/>
+                </svg>
+            </div>
+            <h2 id="tituloConfirmar">Eliminar tarea</h2>
+            <p id="mensajeConfirmar"></p>
+            <div class="modal-acciones">
+                <button type="button" class="boton boton-fantasma" id="btnCancelarConfirmar" data-close>Cancelar</button>
+                <button type="button" class="boton boton-peligro" id="btnConfirmar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ NOTIFICACIONES ============ -->
+    <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
